@@ -677,6 +677,9 @@
   const about = $('#aboutPage');
   $('#openAbout').addEventListener('click', () => { stop(); about.hidden = false; about.querySelector('.pp-body').scrollTop = 0; });
   $('#closeAbout').addEventListener('click', () => { about.hidden = true; });
+  const help = $('#helpPage');
+  $('#openHelp').addEventListener('click', () => { stop(); help.hidden = false; help.querySelector('.pp-body').scrollTop = 0; });
+  $('#closeHelp').addEventListener('click', () => { help.hidden = true; });
   $('#closePeople').addEventListener('click', closePeople);
   document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => openPeople(b.dataset.tab)));
 
@@ -732,6 +735,7 @@
   // ---------- キーボード
   document.addEventListener('keydown', ev => {
     if (ev.target.closest('input, select, textarea')) return;
+    if (!help.hidden) { if (ev.key === 'Escape') help.hidden = true; return; }
     if (!about.hidden) { if (ev.key === 'Escape') about.hidden = true; return; }
     if (!pp.hidden) { if (ev.key === 'Escape') closePeople(); return; }
     if (ev.key === ' ') { ev.preventDefault(); playing ? stop() : play(); }

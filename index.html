@@ -176,7 +176,7 @@ g.mk.focus .badge { stroke-width: 3; }
 .sep { width: 1px; height: 22px; background: var(--line); }
 
 /* 人物・天皇ページ／出典・注意事項ページ */
-#aboutPage, #peoplePage { position: fixed; inset: 0; z-index: 100; background: var(--bg); display: flex; flex-direction: column;
+#helpPage, #aboutPage, #peoplePage { position: fixed; inset: 0; z-index: 100; background: var(--bg); display: flex; flex-direction: column;
   padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
 .pp-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; background: var(--panel); border-bottom: 1px solid var(--line);
   padding-block: 10px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
@@ -227,6 +227,27 @@ table.emp tr.legend td { color: var(--muted); }
 .about dt { font-weight: 700; margin-top: 10px; }
 .about dd { margin: 2px 0 0; color: var(--muted); }
 .about a { color: var(--accent); }
+.about ol { margin: 0; padding-left: 1.4em; line-height: 1.85; font-size: 14.5px; }
+.about .note { color: var(--muted); font-size: 13px; margin-top: 8px; }
+.wire { display: grid; grid-template-columns: 1fr 34%; grid-template-rows: auto 120px auto; gap: 4px; margin: 4px 0 12px; font-size: 12px; }
+.wire > div { border: 1.5px solid var(--line); border-radius: 6px; padding: 6px 8px; background: var(--panel2); display: flex; flex-direction: column; gap: 2px; }
+.wire b { color: var(--accent); font-size: 14px; }
+.wire span { color: var(--muted); font-size: 11px; }
+.wire .w-top, .wire .w-bottom { grid-column: 1 / -1; }
+.wire .w-map { background: var(--sea); }
+.keys { border-collapse: collapse; width: 100%; font-size: 14px; }
+.keys th { text-align: left; vertical-align: top; white-space: nowrap; padding: 8px 12px 8px 0; font-weight: 700; width: 1%; }
+.keys td { padding: 8px 0; line-height: 1.75; border-bottom: 1px solid var(--line); }
+.keys tr:first-child td { border-top: 0; }
+.keys th { border-bottom: 1px solid var(--line); }
+.chipc { display: inline-flex; align-items: center; gap: 4px; margin-right: 10px; white-space: nowrap; }
+.chipc i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+kbd { font-family: inherit; font-size: 12px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 1px 6px; background: var(--panel2); }
+@media (max-width: 560px) {
+  .keys th { white-space: normal; width: 30%; }
+  .wire { grid-template-columns: 1fr; grid-template-rows: auto; }
+  .wire .w-map { min-height: 80px; }
+}
 
 @media (max-width: 860px) {
   main { flex-direction: column; }
@@ -266,6 +287,7 @@ table.emp tr.legend td { color: var(--muted); }
       <div id="results" hidden></div>
     </div>
     <button class="btn" id="openPeople">人物・天皇</button>
+    <button class="btn" id="openHelp" title="画面の見方と使い方">使い方</button>
     <button class="btn" id="openAbout" title="データの出典と注意事項">出典・注意事項</button>
   </header>
 
@@ -341,6 +363,122 @@ table.emp tr.legend td { color: var(--muted); }
     <button class="btn" id="closePeople">地図に戻る ✕</button>
   </div>
   <div class="pp-body"><div class="pp-inner" id="ppContent"></div></div>
+</div>
+
+<div id="helpPage" hidden>
+  <div class="pp-head">
+    <h1>見方・使い方</h1>
+    <div class="grow"></div>
+    <button class="btn" id="closeHelp">地図に戻る ✕</button>
+  </div>
+  <div class="pp-body"><div class="pp-inner about help">
+    <section>
+      <h2>このアプリでできること</h2>
+      <p>神武天皇の時代から令和まで、日本と世界の出来事を地図の上でたどれます。年代を動かすと、その時代の出来事が地図に現れ、遣唐使や黒船は航路の上を船が進みます。ある出来事が何をきっかけに起き、何につながったのかもたどれます。</p>
+    </section>
+
+    <section>
+      <h2>画面の見方</h2>
+      <div class="wire" aria-hidden="true">
+        <div class="w-top"><b>①</b> 今の年・元号・時代・天皇／検索／ページ切り替え</div>
+        <div class="w-map"><b>②</b> 地図<span>左上：地図の範囲と表示モード</span></div>
+        <div class="w-side"><b>③</b> 出来事の説明とつながり</div>
+        <div class="w-bottom"><b>④</b> 年表・再生・移動ボタン</div>
+      </div>
+      <ol class="parts">
+        <li><b>上の欄</b>：今いる年（西暦）、元号、時代、そのときの天皇が出ます。天皇の名前を押すと天皇の一覧が開きます。地域を選んでいるときは、その地域の当時の国名と君主・指導者も出ます。</li>
+        <li><b>地図</b>：出来事の場所に印が出ます。ドラッグで動かし、ホイールやピンチで拡大・縮小できます。</li>
+        <li><b>右の欄</b>：選んでいる出来事の説明、関わった人物、つながり、同じころの世界（または日本）の出来事です。スマホでは地図の下に出ます。</li>
+        <li><b>下の欄</b>：年表と、時代を動かすボタンです。</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>時代を動かす</h2>
+      <table class="keys">
+        <tr><th>▶ 再生</th><td>時代が自動で進みます。出来事に着くと、上に出来事名が表示されます。「出来事で止まる」にチェックがあると、出来事ごとに少し止まります。速さは「ゆっくり／ふつう／はやい」から選べます。</td></tr>
+        <tr><th>◀ 出来事／出来事 ▶</th><td>前の出来事・次の出来事へ移ります。</td></tr>
+        <tr><th>⏮ 元号／元号 ⏭</th><td>前の元号・次の元号の始まりへ移ります。</td></tr>
+        <tr><th>スライダー</th><td>つまみを左右に動かすと、自由に時代を移動できます。古い時代ほど目盛りを詰めて表示しています。</td></tr>
+        <tr><th>時代の色帯</th><td>年表の上の「奈良」「江戸」などの色帯を押すと、その時代の始まりへ移ります。</td></tr>
+        <tr><th>目盛り</th><td>年表の細い縦線が一つ一つの出来事です。押すとその出来事へ移ります。線の色は出来事の分類です。</td></tr>
+        <tr><th>元号・西暦</th><td>「元号」の一覧から選ぶか、「西暦」に年を入れて Enter を押すと、その年へ移ります。</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>地図の印の見方</h2>
+      <table class="keys">
+        <tr><th>⛵</th><td>船での移動（遣唐使、元寇、朱印船など）。点線の航路の上を進み、◎が目的地です。</td></tr>
+        <tr><th>🚢</th><td>蒸気船での移動（黒船、岩倉使節団など）。</td></tr>
+        <tr><th>⚔️ 🐎 ✈️ など</th><td>経路のある出来事では、軍や人の移動を表す絵が経路の上を進みます。</td></tr>
+        <tr><th>丸い印</th><td>その場所で起きた出来事です。印を押すと、その出来事が選ばれます。</td></tr>
+        <tr><th>薄い印</th><td>少し前に起きた出来事です。時代が進むと消えていきます。</td></tr>
+        <tr><th>印の色</th><td>
+          <span class="chipc"><i style="background:var(--c-jp)"></i>国内</span>
+          <span class="chipc"><i style="background:var(--c-ex)"></i>交流・外交</span>
+          <span class="chipc"><i style="background:var(--c-war)"></i>戦い</span>
+          <span class="chipc"><i style="background:var(--c-culture)"></i>文化・宗教</span>
+          <span class="chipc"><i style="background:var(--c-world)"></i>世界</span>
+          <span class="chipc"><i style="background:var(--c-disaster)"></i>災害</span>
+        </td></tr>
+        <tr><th>大きな文字</th><td>当時の国や地域の名前です（唐、高麗、ローマ帝国など）。年代に合わせて変わります。都市名は地図を拡大すると出ます。</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>地図の範囲と表示モード</h2>
+      <table class="keys">
+        <tr><th>自動／日本／東アジア／世界</th><td>地図に映す範囲です。「自動」では、出来事に合わせて日本・東アジア・世界を切り替えます。ほかを選ぶと、その範囲に固定します。</td></tr>
+        <tr><th>ざっくり／詳細</th><td>「ざっくり」は主な出来事だけ、「詳細」は細かい出来事も含めて表示します。</td></tr>
+        <tr><th>地域</th><td>「日本」「世界史（日本以外）」「中国」「イギリス」など24の地域から選べます。選んだ地域の出来事だけで再生・移動でき、地図もその地域に寄ります。右に表示中の出来事の件数が出ます。</td></tr>
+        <tr><th>標準／国別／勢力図</th><td>地図の塗り方です。「国別」は現在の国境で色分けします。「勢力図」は当時の主要国の範囲を塗り、右下にどの年のデータかを表示します。境界はおおまかな目安です。</td></tr>
+      </table>
+      <p class="note">選んだ表示モードは、次に開いたときも残ります（ブラウザに保存されます）。</p>
+    </section>
+
+    <section>
+      <h2>出来事のつながりを見る</h2>
+      <p>右の欄の「つながり」には、選んでいる出来事を真ん中にして、上に「きっかけ・背景」「さらに前の背景」、下に「その後・影響」「さらにその先」が並びます。小さな文字は、どうつながっているかの説明です。どれかを押すと、その出来事へ移ります。</p>
+      <p>例：ペリー来航 → 日米和親条約 → 日米修好通商条約 → 桜田門外の変 … とたどっていけます。</p>
+      <p>「同じころの世界」では、前後60年の世界の出来事が出ます。世界の出来事を選んでいるときは「同じころの日本」になります。</p>
+    </section>
+
+    <section>
+      <h2>検索</h2>
+      <p>上の検索欄に言葉を入れると、出来事・人物・天皇・元号の候補が出ます。選ぶとその場面へ移ります。人物を選ぶと人物のページが開きます。↑↓ で候補を選び、Enter で決定できます。</p>
+    </section>
+
+    <section>
+      <h2>人物・天皇のページ</h2>
+      <p>上の「人物・天皇」を押すと開きます。</p>
+      <ul>
+        <li><b>天皇（126代）</b>：歴代天皇の一覧です。今の年の天皇に色が付きます。行を押すと、その天皇の即位の年へ移ります。</li>
+        <li><b>代表的な人物</b>：時代ごとに並んでいます。「日本／世界」や名前で絞り込めます。人物を押すと説明と関わった出来事が出て、出来事を押すと地図へ移ります。</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>キーボード操作</h2>
+      <table class="keys">
+        <tr><th><kbd>Space</kbd></th><td>再生／停止</td></tr>
+        <tr><th><kbd>←</kbd> <kbd>→</kbd></th><td>前の出来事／次の出来事</td></tr>
+        <tr><th><kbd>Shift</kbd> + <kbd>←</kbd> <kbd>→</kbd></th><td>前の元号／次の元号</td></tr>
+        <tr><th><kbd>Esc</kbd></th><td>開いているページを閉じて地図に戻る</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>はじめての方へのおすすめ</h2>
+      <ol>
+        <li>そのまま「▶ 再生」を押して、遣唐使の時代から流れを眺める。</li>
+        <li>気になった出来事で止めて、右の「つながり」をたどる。</li>
+        <li>「詳細」と地域「中国」や「イギリス」に切り替えて、同じ時代の外国を見る。</li>
+        <li>「勢力図」に切り替えて、国の広がりの移り変わりを見る。</li>
+      </ol>
+      <p class="note">内容は生成AIが作成したため、誤りが含まれている可能性があります。くわしくは「出典・注意事項」をご覧ください。</p>
+    </section>
+  </div></div>
 </div>
 
 <div id="aboutPage" hidden>
