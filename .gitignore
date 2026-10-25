@@ -1,0 +1,9 @@
+# 手元の確認用の設定
+.claude/
+
+# 勢力図の元データ（tools/download_basemaps.mjs で取得、約55MB）
+basemaps/
+
+# スクリプトの依存パッケージ
+node_modules/
+tools/package-lock.json

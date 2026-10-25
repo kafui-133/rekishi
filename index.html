@@ -1,0 +1,394 @@
+<title>歴史航路</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* 地図が主役。上=現在地（年・元号・天皇）、中央=地図＋右に出来事カード、下=年表スライダー */
+:root {
+  --bg: #e7ebe6; --panel: #f8f9f5; --panel2: #eef1ec; --ink: #1b2326; --muted: #5a6668; --line: #cdd4ce;
+  --accent: #9a6a12; --accent-soft: #f1e3c4;
+  --sea: #b7cfd3; --land: #ebe2cb; --land-stroke: #a59572; --japan: #dcc184; --border: #a99c7a; --grid: #9fbcc1;
+  --p0: #e8c9a6; --p1: #c8dbad; --p2: #b8cfe2; --p3: #e5b8b8; --p4: #d6c6e6; --p5: #efdc9e; --p6: #b5ddd2; --p7: #d8c9b2;
+  --label: #4d4029; --hist: #6b5a3a; --halo: #f4efe2;
+  --c-jp: #b4462f; --c-ex: #2c6c9f; --c-war: #8b2a3b; --c-culture: #7656a3; --c-world: #36845a; --c-disaster: #b8731a;
+  --display: 'Shippori Mincho B1', 'Yu Mincho', 'Hiragino Mincho ProN', serif;
+  --body: 'Zen Kaku Gothic New', 'Hiragino Sans', 'Yu Gothic UI', 'Meiryo', sans-serif;
+  --emoji: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e1416; --panel: #152024; --panel2: #1b292e; --ink: #e5e9e2; --muted: #9ba7a6; --line: #2a393d;
+  --accent: #dcaa4e; --accent-soft: #3a3020;
+  --sea: #12303a; --land: #3a4033; --land-stroke: #69704f; --japan: #6e5c30; --border: #586049; --grid: #1d4350;
+  --p0: #6b5236; --p1: #4e6540; --p2: #3e5970; --p3: #6a4444; --p4: #594a6d; --p5: #6d6034; --p6: #3e675e; --p7: #5d5240;
+  --label: #eadfc4; --hist: #c9b98f; --halo: #12303a;
+  --c-jp: #e2765c; --c-ex: #5ea6de; --c-war: #dc6274; --c-culture: #b08dd8; --c-world: #6fc18d; --c-disaster: #e4a64a;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0e1416; --panel: #152024; --panel2: #1b292e; --ink: #e5e9e2; --muted: #9ba7a6; --line: #2a393d;
+  --accent: #dcaa4e; --accent-soft: #3a3020;
+  --sea: #12303a; --land: #3a4033; --land-stroke: #69704f; --japan: #6e5c30; --border: #586049; --grid: #1d4350;
+  --p0: #6b5236; --p1: #4e6540; --p2: #3e5970; --p3: #6a4444; --p4: #594a6d; --p5: #6d6034; --p6: #3e675e; --p7: #5d5240;
+  --label: #eadfc4; --hist: #c9b98f; --halo: #12303a;
+  --c-jp: #e2765c; --c-ex: #5ea6de; --c-war: #dc6274; --c-culture: #b08dd8; --c-world: #6fc18d; --c-disaster: #e4a64a;
+  color-scheme: dark; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+#app { position: fixed; inset: 0; display: flex; flex-direction: column;
+  padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+
+/* ヘッダー */
+#top { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; background: var(--panel); border-bottom: 1px solid var(--line);
+  padding-block: 8px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.brand { font-family: var(--display); font-weight: 800; font-size: 20px; letter-spacing: .08em; color: var(--accent); white-space: nowrap; }
+#now { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; min-width: 0; flex: 1; }
+#nowYear { font-family: var(--display); font-weight: 800; font-size: 26px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+#nowMeta { display: flex; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+#nowMeta b { color: var(--ink); font-weight: 700; }
+.pill { border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; background: var(--panel2); white-space: nowrap; }
+.pill.emp { cursor: pointer; }
+.pill.emp:hover { border-color: var(--accent); }
+.search { position: relative; width: min(320px, 100%); }
+#q { width: 100%; padding: 7px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel2); }
+#results { position: absolute; z-index: 50; top: calc(100% + 4px); left: 0; right: 0; max-height: 60vh; overflow: auto;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.25); padding: 6px; }
+#results .grp { font-size: 11px; color: var(--muted); letter-spacing: .08em; padding: 6px 8px 2px; }
+#results button { display: flex; gap: 8px; width: 100%; text-align: left; background: none; border: 0; padding: 6px 8px; border-radius: 6px; }
+#results button:hover, #results button.sel { background: var(--accent-soft); }
+#results .yr { color: var(--muted); font-size: 12px; min-width: 64px; font-variant-numeric: tabular-nums; }
+.btn { border: 1px solid var(--line); background: var(--panel2); border-radius: 8px; padding: 6px 12px; white-space: nowrap; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--panel); font-weight: 700; }
+
+/* 本体 */
+main { flex: 1; min-height: 0; display: flex; }
+#mapWrap { position: relative; flex: 1; min-width: 0; background: var(--sea); overflow: hidden; }
+#map { width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; }
+#map:active { cursor: grabbing; }
+.land { fill: var(--land); stroke: var(--land-stroke); stroke-width: .6; vector-effect: non-scaling-stroke; }
+.japan { fill: var(--japan); stroke: var(--land-stroke); stroke-width: .8; vector-effect: non-scaling-stroke; }
+.borders { fill: none; stroke: var(--border); stroke-width: .5; stroke-dasharray: 2 3; vector-effect: non-scaling-stroke; opacity: .55; }
+.pw { fill-opacity: .72; stroke: var(--panel); stroke-width: .8; vector-effect: non-scaling-stroke; }
+.pwl { fill: var(--ink); font-family: var(--display); font-weight: 800; text-anchor: middle; dominant-baseline: central; paint-order: stroke; stroke: var(--halo); stroke-linejoin: round; pointer-events: none; }
+.pnote { position: absolute; right: 12px; bottom: 12px; max-width: min(320px, calc(100% - 24px)); display: flex; flex-direction: column; gap: 2px;
+  background: color-mix(in srgb, var(--panel) 90%, transparent); border: 1px solid var(--line); border-radius: 10px; padding: 6px 10px; font-size: 11px; color: var(--muted); }
+.pnote b { color: var(--ink); font-size: 13px; }
+.pnote a { color: var(--accent); }
+.cty { stroke: var(--land-stroke); stroke-width: .5; vector-effect: non-scaling-stroke; }
+.c0 { fill: var(--p0); } .c1 { fill: var(--p1); } .c2 { fill: var(--p2); } .c3 { fill: var(--p3); }
+.c4 { fill: var(--p4); } .c5 { fill: var(--p5); } .c6 { fill: var(--p6); } .c7 { fill: var(--p7); }
+.grid { fill: none; stroke: var(--grid); stroke-width: .6; vector-effect: non-scaling-stroke; }
+.hl { fill: var(--hist); font-family: var(--display); font-weight: 800; letter-spacing: .25em; text-anchor: middle; opacity: .62; pointer-events: none; }
+.city text { fill: var(--label); font-weight: 500; paint-order: stroke; stroke: var(--halo); stroke-width: 3px; stroke-linejoin: round; }
+.city circle { fill: var(--label); }
+.route-shadow { fill: none; stroke: var(--halo); opacity: .55; }
+.route { fill: none; stroke-linecap: round; }
+.r.old { opacity: .45; }
+.badge { fill: var(--panel); stroke-width: 2.2; }
+.emoji { font-family: var(--emoji); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.evlabel { font-size: 13px; font-weight: 700; fill: var(--ink); paint-order: stroke; stroke: var(--halo); stroke-width: 4px; stroke-linejoin: round; }
+.evlabel .y { font-weight: 500; fill: var(--muted); }
+g.mk { cursor: pointer; }
+g.mk.old .evlabel { font-size: 11px; font-weight: 500; }
+g.mk.focus .evlabel { font-size: 15px; }
+g.mk.focus .badge { stroke-width: 3; }
+.pulse { fill: none; stroke-width: 2; transform-box: fill-box; transform-origin: center; animation: pulse 1.8s ease-out infinite; }
+@keyframes pulse { from { transform: scale(.7); opacity: .9; } to { transform: scale(2.1); opacity: 0; } }
+.bob { transform-box: fill-box; transform-origin: center; animation: bob 1.8s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(-1.5px) rotate(-3deg); } }
+.smoke { animation: smoke 1.4s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes smoke { from { opacity: .8; transform: scale(.6); } to { opacity: 0; transform: scale(1.6) translate(-4px, -4px); } }
+.dest { fill: none; stroke-width: 2; }
+
+.viewbtns { position: absolute; top: 12px; left: 12px; display: flex; gap: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,.15); }
+.viewbtns button { border: 0; background: none; padding: 6px 12px; font-size: 13px; border-right: 1px solid var(--line); }
+.viewbtns button:last-child { border-right: 0; }
+.viewbtns button.on { background: var(--accent); color: var(--panel); font-weight: 700; }
+.modebar { position: absolute; top: 12px; right: 12px; display: flex; align-items: center; gap: 8px; background: var(--panel); border: 1px solid var(--line);
+  border-radius: 10px; padding: 4px 8px 4px 4px; box-shadow: 0 4px 14px rgba(0,0,0,.15); font-size: 13px; }
+.lvbtns { display: flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+.lvbtns button { border: 0; background: none; padding: 4px 10px; font-size: 13px; white-space: nowrap; }
+.modebar { flex-wrap: wrap; max-width: calc(100% - 24px); }
+#regionSel { min-width: 0; flex: 1 1 140px; }
+.lvbtns button.on { background: var(--ink); color: var(--panel); font-weight: 700; }
+#regionSel { border: 1px solid var(--line); background: var(--panel2); border-radius: 7px; padding: 4px 6px; font-size: 13px; max-width: 46vw; }
+#modeCount { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lvtag { font-size: 11px; border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; }
+.pill.reg { border-color: var(--accent); }
+.legend { position: absolute; left: 12px; bottom: 12px; display: flex; flex-wrap: wrap; gap: 4px 10px; max-width: calc(100% - 24px);
+  background: color-mix(in srgb, var(--panel) 88%, transparent); border: 1px solid var(--line); border-radius: 10px; padding: 6px 10px; font-size: 12px; }
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+.legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+#toast { position: absolute; top: 12px; left: 50%; transform: translate(-50%, -8px); opacity: 0; transition: opacity .3s, transform .3s; pointer-events: none;
+  background: var(--panel); border: 2px solid var(--accent); border-radius: 12px; padding: 8px 16px; box-shadow: 0 8px 24px rgba(0,0,0,.25); text-align: center; max-width: min(520px, calc(100% - 24px)); }
+#toast.show { opacity: 1; transform: translate(-50%, 0); }
+#toast .t1 { font-size: 11px; letter-spacing: .2em; color: var(--accent); font-weight: 700; }
+#toast .t2 { font-family: var(--display); font-weight: 800; font-size: 18px; text-wrap: balance; }
+
+/* サイドパネル */
+#side { width: 380px; flex: none; overflow-y: auto; background: var(--panel); border-left: 1px solid var(--line); padding: 16px 18px 24px; display: flex; flex-direction: column; gap: 18px; }
+.evhead { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+.cat { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 999px; color: var(--panel); }
+#side h2 { font-family: var(--display); font-weight: 800; font-size: 23px; line-height: 1.35; margin: 6px 0 0; text-wrap: balance; }
+#side p.desc { line-height: 1.85; margin: 8px 0 0; font-size: 14.5px; }
+#side h3 { font-size: 12px; letter-spacing: .14em; color: var(--muted); margin: 0 0 8px; font-weight: 700; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { display: inline-flex; align-items: baseline; gap: 6px; border: 1px solid var(--line); background: var(--panel2); border-radius: 8px; padding: 5px 9px; font-size: 13px; text-align: left; line-height: 1.4; }
+.chip:hover { border-color: var(--accent); }
+.chip .cy { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.chip .lbl { font-size: 11px; color: var(--accent); white-space: nowrap; }
+.chip.person { border-radius: 999px; }
+.flow { display: flex; flex-direction: column; gap: 4px; }
+.flow .row { border-left: 3px solid var(--line); padding: 4px 0 4px 10px; }
+.flow .row .rl { font-size: 11px; color: var(--muted); margin-bottom: 4px; letter-spacing: .06em; }
+.flow .row.me { border-left-color: var(--accent); }
+.flow .row.me .chip { background: var(--accent-soft); border-color: var(--accent); font-weight: 700; }
+.flow .arrow { color: var(--muted); font-size: 12px; padding-left: 6px; }
+.empty { color: var(--muted); font-size: 13px; }
+.navrow { display: flex; gap: 8px; }
+.navrow .btn { flex: 1; font-size: 13px; }
+
+/* 下部コントロール */
+#ctrl { background: var(--panel); border-top: 1px solid var(--line);
+  padding-block: 8px 10px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 8px; }
+#track { position: relative; user-select: none; }
+#bands { position: relative; height: 20px; border-radius: 6px; overflow: hidden; }
+#bands div { position: absolute; top: 0; bottom: 0; font-size: 11px; color: #fff; padding: 2px 4px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; cursor: pointer; border-right: 1px solid var(--panel); text-shadow: 0 1px 1px rgba(0,0,0,.35); }
+#ticks { position: relative; height: 16px; margin-top: 3px; }
+#ticks i { position: absolute; top: 2px; width: 3px; height: 12px; margin-left: -1px; border-radius: 2px; cursor: pointer; opacity: .75; }
+#ticks i:hover, #ticks i.on { opacity: 1; height: 16px; top: 0; width: 5px; margin-left: -2px; }
+#nowline { position: absolute; top: -2px; height: 44px; width: 2px; margin-left: -1px; background: var(--ink); pointer-events: none; border-radius: 1px; }
+#slider { width: 100%; margin: 2px 0 0; accent-color: var(--accent); }
+#axis { position: relative; height: 14px; font-size: 10px; color: var(--muted); font-variant-numeric: tabular-nums; }
+#axis span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.buttons { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+.buttons .grp { display: flex; gap: 4px; align-items: center; }
+.buttons label { font-size: 12px; color: var(--muted); display: inline-flex; gap: 4px; align-items: center; }
+.buttons select, .buttons input[type=number] { border: 1px solid var(--line); background: var(--panel2); border-radius: 8px; padding: 5px 6px; font-size: 13px; }
+.buttons input[type=number] { width: 84px; }
+#play { min-width: 84px; }
+.sep { width: 1px; height: 22px; background: var(--line); }
+
+/* 人物・天皇ページ／出典・注意事項ページ */
+#aboutPage, #peoplePage { position: fixed; inset: 0; z-index: 100; background: var(--bg); display: flex; flex-direction: column;
+  padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.pp-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; background: var(--panel); border-bottom: 1px solid var(--line);
+  padding-block: 10px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.pp-head h1 { font-family: var(--display); font-size: 20px; margin: 0; font-weight: 800; }
+.tabs { display: flex; gap: 4px; }
+.tabs button { border: 1px solid var(--line); background: var(--panel2); border-radius: 999px; padding: 5px 14px; font-size: 13px; }
+.tabs button.on { background: var(--accent); border-color: var(--accent); color: var(--panel); font-weight: 700; }
+.pp-head .grow { flex: 1; }
+.pp-body { flex: 1; min-height: 0; overflow: auto; padding-block: 16px 32px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.pp-inner { max-width: 1100px; margin: 0 auto; }
+.tablewrap { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
+table.emp { border-collapse: collapse; width: 100%; font-size: 14px; }
+table.emp th { text-align: left; font-size: 12px; color: var(--muted); font-weight: 700; padding: 8px 10px; position: sticky; top: 0; background: var(--panel); border-bottom: 1px solid var(--line); }
+table.emp td { padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.emp td.n { font-variant-numeric: tabular-nums; color: var(--muted); text-align: right; width: 48px; }
+table.emp td.yr { font-variant-numeric: tabular-nums; white-space: nowrap; }
+table.emp td.nm { font-weight: 700; white-space: nowrap; }
+table.emp td.note { color: var(--muted); font-size: 13px; min-width: 220px; }
+table.emp tr { cursor: pointer; }
+table.emp tr:hover td { background: var(--panel2); }
+table.emp tr.cur td { background: var(--accent-soft); }
+table.emp tr.legend td { color: var(--muted); }
+.pgroup { margin-bottom: 22px; }
+.pgroup h2 { font-family: var(--display); font-size: 17px; margin: 0 0 8px; display: flex; align-items: center; gap: 8px; }
+.pgroup h2 i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.pgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px; }
+.pcard { text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; }
+.pcard:hover { border-color: var(--accent); }
+.pcard b { font-size: 15px; }
+.pcard span { font-size: 12px; color: var(--muted); }
+.pcard.world b::after { content: '世界'; font-size: 10px; font-weight: 700; margin-left: 6px; padding: 1px 6px; border-radius: 999px; background: var(--c-world); color: var(--panel); vertical-align: 2px; }
+.pfilter { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.pfilter input { padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); width: min(260px, 100%); }
+.pdetail { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px; max-width: 720px; }
+.pdetail h2 { font-family: var(--display); font-size: 28px; margin: 4px 0; }
+.pdetail .life { color: var(--muted); font-variant-numeric: tabular-nums; }
+.pdetail p { line-height: 1.9; max-width: 65ch; }
+.pdetail h3 { font-size: 12px; letter-spacing: .14em; color: var(--muted); margin: 18px 0 8px; }
+
+.about { max-width: 760px; display: flex; flex-direction: column; gap: 16px; }
+.about section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px 20px; }
+.about section.warn { border: 2px solid var(--accent); }
+.about h2 { font-family: var(--display); font-size: 18px; margin: 0 0 8px; }
+.about p, .about li, .about dd { line-height: 1.85; font-size: 14.5px; max-width: 65ch; }
+.about p { margin: 0 0 8px; }
+.about ul { margin: 0; padding-left: 1.3em; }
+.about dl { margin: 0; }
+.about dt { font-weight: 700; margin-top: 10px; }
+.about dd { margin: 2px 0 0; color: var(--muted); }
+.about a { color: var(--accent); }
+
+@media (max-width: 860px) {
+  main { flex-direction: column; }
+  #side { width: auto; border-left: 0; border-top: 1px solid var(--line); max-height: 36%; flex: none; padding: 12px 16px 20px; }
+  #side h2 { font-size: 19px; }
+  #nowYear { font-size: 20px; }
+  .brand, .legend, #axis { display: none; }
+  #top { gap: 6px 8px; padding-block: 6px; }
+  #now { flex: 1 1 100%; gap: 8px; }
+  #nowMeta { font-size: 12px; gap: 4px; }
+  .search { width: auto; flex: 1; min-width: 0; }
+  #q { padding: 5px 10px; }
+  #top .btn { padding: 5px 10px; }
+  .buttons { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px; }
+  .buttons .btn { padding: 5px 9px; }
+  #ctrl { padding-block: 6px; gap: 6px; }
+  .viewbtns button { padding: 5px 9px; }
+  .modebar { top: 50px; right: auto; left: 12px; }
+}
+@media (min-width: 861px) and (max-width: 1180px) {
+  .modebar { top: 52px; right: auto; left: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pulse, .bob, .smoke { animation: none; }
+}
+</style>
+
+<div id="app">
+  <header id="top">
+    <div class="brand">歴史航路</div>
+    <div id="now">
+      <div id="nowYear">717年</div>
+      <div id="nowMeta"></div>
+    </div>
+    <div class="search">
+      <input id="q" type="search" placeholder="人物・出来事・元号・天皇を検索" autocomplete="off" aria-label="検索">
+      <div id="results" hidden></div>
+    </div>
+    <button class="btn" id="openPeople">人物・天皇</button>
+    <button class="btn" id="openAbout" title="データの出典と注意事項">出典・注意事項</button>
+  </header>
+
+  <main>
+    <section id="mapWrap">
+      <svg id="map" aria-label="歴史地図"></svg>
+      <div class="viewbtns" role="group" aria-label="地図の範囲">
+        <button data-view="auto" class="on" title="出来事に合わせて自動で切り替え">自動</button>
+        <button data-view="jp">日本</button>
+        <button data-view="asia">東アジア</button>
+        <button data-view="world">世界</button>
+      </div>
+      <div class="modebar" role="group" aria-label="表示モード">
+        <div class="lvbtns">
+          <button data-lv="1" class="on" title="主な出来事だけ">ざっくり</button>
+          <button data-lv="2" title="細かい出来事も含める">詳細</button>
+        </div>
+        <select id="regionSel" aria-label="地域"></select>
+        <span id="modeCount"></span>
+        <div class="lvbtns" id="colorBtns" title="国別の色分けは現在の国境です">
+          <button data-color="plain" class="on">標準</button>
+          <button data-color="country">国別</button>
+          <button data-color="power" title="当時の主要国の範囲（おおまか）">勢力図</button>
+        </div>
+      </div>
+      <div class="legend" id="legend"></div>
+      <div id="powerNote" class="pnote" hidden><b id="powerYear"></b><span>境界はおおまかです。出典: <a href="https://github.com/aourednik/historical-basemaps" target="_blank" rel="noopener">historical-basemaps</a>（GPL-3.0）</span></div>
+      <div id="toast"><div class="t1">出来事</div><div class="t2"></div></div>
+    </section>
+    <aside id="side"></aside>
+  </main>
+
+  <footer id="ctrl">
+    <div id="track">
+      <div id="bands"></div>
+      <div id="ticks"></div>
+      <input type="range" id="slider" min="0" max="10000" step="1" aria-label="年代">
+      <div id="nowline"></div>
+    </div>
+    <div id="axis"></div>
+    <div class="buttons">
+      <div class="grp">
+        <button class="btn" id="eraPrev" title="前の元号（Shift+←）">⏮ 元号</button>
+        <button class="btn" id="evPrev" title="前の出来事（←）">◀ 出来事</button>
+        <button class="btn primary" id="play" title="再生／停止（Space）">▶ 再生</button>
+        <button class="btn" id="evNext" title="次の出来事（→）">出来事 ▶</button>
+        <button class="btn" id="eraNext" title="次の元号（Shift+→）">元号 ⏭</button>
+      </div>
+      <span class="sep"></span>
+      <label>速さ
+        <select id="speed">
+          <option value="0.0025">ゆっくり</option>
+          <option value="0.006" selected>ふつう</option>
+          <option value="0.015">はやい</option>
+        </select>
+      </label>
+      <label><input type="checkbox" id="autopause" checked> 出来事で止まる</label>
+      <span class="sep"></span>
+      <label>元号 <select id="eraSel"></select></label>
+      <label>西暦 <input type="number" id="yearIn" min="-660" max="2026" placeholder="例 1600"></label>
+    </div>
+  </footer>
+</div>
+
+<div id="peoplePage" hidden>
+  <div class="pp-head">
+    <h1>人物・天皇</h1>
+    <div class="tabs">
+      <button data-tab="emp" class="on">天皇（126代）</button>
+      <button data-tab="people">代表的な人物</button>
+    </div>
+    <div class="grow"></div>
+    <button class="btn" id="closePeople">地図に戻る ✕</button>
+  </div>
+  <div class="pp-body"><div class="pp-inner" id="ppContent"></div></div>
+</div>
+
+<div id="aboutPage" hidden>
+  <div class="pp-head">
+    <h1>出典・注意事項</h1>
+    <div class="grow"></div>
+    <button class="btn" id="closeAbout">地図に戻る ✕</button>
+  </div>
+  <div class="pp-body"><div class="pp-inner about">
+    <section class="warn">
+      <h2>このアプリの内容について</h2>
+      <p>このアプリの出来事・人物・天皇・元号・各国の君主や指導者・年代・説明文・出来事どうしのつながり、および勢力図の日本語の国名と色分けは、<b>生成AI（Claude）が作成したもの</b>です。資料と一件ずつ照らし合わせる確認はしていないため、<b>年代・名前・内容に誤りが含まれている可能性があります</b>。</p>
+      <p>学習や調べものに使うときは、教科書・事典・専門書などの信頼できる資料で確かめてください。</p>
+    </section>
+    <section>
+      <h2>特に注意が必要な点</h2>
+      <ul>
+        <li>第1代神武天皇から第9代ごろまでの年代は『日本書紀』の伝承によるもので、史実とは考えられていません。</li>
+        <li>元号の年は西暦の年単位で区切っています。改元した月のずれは反映していません。</li>
+        <li>出来事の場所や船の航路はおおよその位置で、実際の経路とは異なることがあります。</li>
+        <li>君主・指導者は主な人物だけを登録しているため、表示されない期間があります。</li>
+        <li>勢力図の境界はおおまかなもので、約40の時点のデータを近い年に当てはめて表示しています。主要国以外は表示していません。</li>
+        <li>「国別」の色分けは現在の国境です。</li>
+      </ul>
+    </section>
+    <section>
+      <h2>出典・使用データ</h2>
+      <dl>
+        <dt>勢力図（過去の国境）</dt>
+        <dd><a href="https://github.com/aourednik/historical-basemaps" target="_blank" rel="noopener">historical-basemaps</a>（André Ourednik ほか）GPL-3.0 ライセンス。主要国のみを抽出し、形を簡略化して使用しています。国名の日本語訳と色分けはこのアプリで付けたものです。</dd>
+        <dt>世界地図（陸地・現在の国境）</dt>
+        <dd><a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener">Natural Earth</a>（パブリックドメイン）を <a href="https://github.com/topojson/world-atlas" target="_blank" rel="noopener">world-atlas</a>（ISC ライセンス）の形式で使用しています。</dd>
+        <dt>出来事・人物・天皇・元号・君主・説明文</dt>
+        <dd>生成AI（Claude）が学習済みの知識をもとに作成しました。特定の資料からの転載ではありません。</dd>
+        <dt>プログラム部品</dt>
+        <dd><a href="https://d3js.org/" target="_blank" rel="noopener">D3.js</a>（ISC ライセンス）、<a href="https://github.com/topojson/topojson-client" target="_blank" rel="noopener">topojson-client</a>（ISC ライセンス）</dd>
+        <dt>フォント</dt>
+        <dd>Google Fonts の Shippori Mincho B1、Zen Kaku Gothic New（SIL Open Font License）</dd>
+        <dt>このアプリのライセンス</dt>
+        <dd>勢力図データが GPL-3.0 のデータを改変したものであるため、このアプリのプログラムとデータは GNU General Public License v3.0 で公開しています。</dd>
+      </dl>
+    </section>
+  </div></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+<script src="world.js"></script>
+<script src="data.js"></script>
+<script src="powers.js"></script>
+<script src="app.js"></script>
