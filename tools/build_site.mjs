@@ -4,6 +4,7 @@
 // 使い方: node tools/build_site.mjs
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..');
 const OUT = path.join(ROOT, 'docs');
@@ -13,7 +14,16 @@ const src = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 const cut = src.indexOf('</style>') + '</style>'.length;
 if (cut < 8) throw new Error('index.html に </style> が見つかりません');
 const head = src.slice(0, cut).replace(/<meta name="claude:viewport-fit-sides"[^>]*>\n?/, '');
-const body = src.slice(cut).trim();
+let body = src.slice(cut).trim();
+
+// GitHub Pages はファイルを10分ほどキャッシュさせるので、中身のハッシュを ?v= に付けて
+// 更新したファイルは必ず新しく読み込まれるようにする
+for (const f of FILES) {
+  const hash = crypto.createHash('sha256').update(fs.readFileSync(path.join(ROOT, f))).digest('hex').slice(0, 10);
+  const tag = `<script src="${f}"></script>`;
+  if (!body.includes(tag)) throw new Error(`index.html に ${tag} が見つかりません`);
+  body = body.replace(tag, `<script src="${f}?v=${hash}"></script>`);
+}
 
 // アーティファクトの外枠が足していた最低限のリセットをここで補う
 const reset = '<style>html,body{margin:0;height:100%}body{font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>';
