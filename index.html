@@ -11,7 +11,7 @@
   --sea: #b7cfd3; --land: #ebe2cb; --land-stroke: #a59572; --japan: #dcc184; --border: #a99c7a; --grid: #9fbcc1;
   --p0: #e8c9a6; --p1: #c8dbad; --p2: #b8cfe2; --p3: #e5b8b8; --p4: #d6c6e6; --p5: #efdc9e; --p6: #b5ddd2; --p7: #d8c9b2;
   --label: #4d4029; --hist: #6b5a3a; --halo: #f4efe2;
-  --c-jp: #b4462f; --c-ex: #2c6c9f; --c-war: #8b2a3b; --c-culture: #7656a3; --c-world: #36845a; --c-disaster: #b8731a;
+  --c-jp: #b4462f; --c-ex: #2c6c9f; --c-war: #8b2a3b; --c-culture: #7656a3; --c-econ: #0f8789; --c-world: #36845a; --c-disaster: #b8731a;
   --display: 'Shippori Mincho B1', 'Yu Mincho', 'Hiragino Mincho ProN', serif;
   --body: 'Zen Kaku Gothic New', 'Hiragino Sans', 'Yu Gothic UI', 'Meiryo', sans-serif;
   --emoji: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
@@ -22,7 +22,7 @@
   --sea: #12303a; --land: #3a4033; --land-stroke: #69704f; --japan: #6e5c30; --border: #586049; --grid: #1d4350;
   --p0: #6b5236; --p1: #4e6540; --p2: #3e5970; --p3: #6a4444; --p4: #594a6d; --p5: #6d6034; --p6: #3e675e; --p7: #5d5240;
   --label: #eadfc4; --hist: #c9b98f; --halo: #12303a;
-  --c-jp: #e2765c; --c-ex: #5ea6de; --c-war: #dc6274; --c-culture: #b08dd8; --c-world: #6fc18d; --c-disaster: #e4a64a;
+  --c-jp: #e2765c; --c-ex: #5ea6de; --c-war: #dc6274; --c-culture: #b08dd8; --c-econ: #3cc3c4; --c-world: #6fc18d; --c-disaster: #e4a64a;
   color-scheme: dark; } }
 :root[data-theme="dark"] {
   --bg: #0e1416; --panel: #152024; --panel2: #1b292e; --ink: #e5e9e2; --muted: #9ba7a6; --line: #2a393d;
@@ -30,7 +30,7 @@
   --sea: #12303a; --land: #3a4033; --land-stroke: #69704f; --japan: #6e5c30; --border: #586049; --grid: #1d4350;
   --p0: #6b5236; --p1: #4e6540; --p2: #3e5970; --p3: #6a4444; --p4: #594a6d; --p5: #6d6034; --p6: #3e675e; --p7: #5d5240;
   --label: #eadfc4; --hist: #c9b98f; --halo: #12303a;
-  --c-jp: #e2765c; --c-ex: #5ea6de; --c-war: #dc6274; --c-culture: #b08dd8; --c-world: #6fc18d; --c-disaster: #e4a64a;
+  --c-jp: #e2765c; --c-ex: #5ea6de; --c-war: #dc6274; --c-culture: #b08dd8; --c-econ: #3cc3c4; --c-world: #6fc18d; --c-disaster: #e4a64a;
   color-scheme: dark; }
 
 * { box-sizing: border-box; }
@@ -47,7 +47,7 @@ button { cursor: pointer; }
 #top { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; background: var(--panel); border-bottom: 1px solid var(--line);
   padding-block: 8px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 .brand { font-family: var(--display); font-weight: 800; font-size: 20px; letter-spacing: .08em; color: var(--accent); white-space: nowrap; }
-#now { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; min-width: 0; flex: 1; }
+#now { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; min-width: 0; flex: 1 1 380px; }
 #nowYear { font-family: var(--display); font-weight: 800; font-size: 26px; font-variant-numeric: tabular-nums; white-space: nowrap; }
 #nowMeta { display: flex; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
 #nowMeta b { color: var(--ink); font-weight: 700; }
@@ -176,7 +176,7 @@ g.mk.focus .badge { stroke-width: 3; }
 .sep { width: 1px; height: 22px; background: var(--line); }
 
 /* 人物・天皇ページ／出典・注意事項ページ */
-#helpPage, #aboutPage, #peoplePage { position: fixed; inset: 0; z-index: 100; background: var(--bg); display: flex; flex-direction: column;
+#moneyPage, #helpPage, #aboutPage, #peoplePage { position: fixed; inset: 0; z-index: 100; background: var(--bg); display: flex; flex-direction: column;
   padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
 .pp-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; background: var(--panel); border-bottom: 1px solid var(--line);
   padding-block: 10px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
@@ -227,6 +227,29 @@ table.emp tr.legend td { color: var(--muted); }
 .about dt { font-weight: 700; margin-top: 10px; }
 .about dd { margin: 2px 0 0; color: var(--muted); }
 .about a { color: var(--accent); }
+/* お金の歴史 */
+.money-page { max-width: 1100px; }
+.m-intro p { margin: 0 0 10px; }
+.m-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; }
+.m-legend span, .pill.money, .chip.money { display: inline-flex; align-items: center; gap: 5px; }
+.m-legend i, .pill.money i, .chip.money i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; flex: none; }
+.gantt-wrap { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.gantt { --gname: 104px; position: relative; min-width: 900px; display: flex; flex-direction: column; gap: 6px; }
+.g-row, .g-axis { display: flex; align-items: stretch; }
+.g-name { width: var(--gname); flex: none; font-size: 13px; font-weight: 700; display: flex; align-items: center; }
+.g-row.sel .g-name { color: var(--accent); }
+.g-track { position: relative; flex: 1; height: 34px; }
+.g-axis .g-track { height: 16px; font-size: 10px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.g-axis span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.g-seg { position: absolute; top: 0; bottom: 0; border: 0; border-right: 1px solid var(--panel); padding: 0 4px; overflow: hidden; color: #fff; font-size: 11px; font-weight: 700; text-align: left; text-shadow: 0 1px 2px rgba(0,0,0,.45); }
+.g-seg span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.g-seg:hover { filter: brightness(1.08); }
+.g-seg.picked { outline: 3px solid var(--ink); outline-offset: -3px; z-index: 1; }
+.g-now { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--ink); pointer-events: none; }
+.m-detail .evhead { margin-bottom: 4px; }
+.m-detail h2 { margin: 4px 0 6px; }
+.m-detail h3 { font-size: 12px; letter-spacing: .14em; color: var(--muted); margin: 12px 0 8px; }
+.m-detail .navrow { margin-top: 12px; max-width: 320px; }
 .about ol { margin: 0; padding-left: 1.4em; line-height: 1.85; font-size: 14.5px; }
 .about .note { color: var(--muted); font-size: 13px; margin-top: 8px; }
 .wire { display: grid; grid-template-columns: 1fr 34%; grid-template-rows: auto 120px auto; gap: 4px; margin: 4px 0 12px; font-size: 12px; }
@@ -287,6 +310,7 @@ kbd { font-family: inherit; font-size: 12px; border: 1px solid var(--line); bord
       <div id="results" hidden></div>
     </div>
     <button class="btn" id="openPeople">人物・天皇</button>
+    <button class="btn" id="openMoney" title="貨幣制度の移り変わり">お金の歴史</button>
     <button class="btn" id="openHelp" title="画面の見方と使い方">使い方</button>
     <button class="btn" id="openAbout" title="データの出典と注意事項">出典・注意事項</button>
   </header>
@@ -306,6 +330,10 @@ kbd { font-family: inherit; font-size: 12px; border: 1px solid var(--line); bord
           <button data-lv="2" title="細かい出来事も含める">詳細</button>
         </div>
         <select id="regionSel" aria-label="地域"></select>
+        <select id="themeSel" aria-label="テーマ">
+          <option value="all">すべてのテーマ</option>
+          <option value="econ">経済・お金</option>
+        </select>
         <span id="modeCount"></span>
         <div class="lvbtns" id="colorBtns" title="国別の色分けは現在の国境です">
           <button data-color="plain" class="on">標準</button>
@@ -363,6 +391,15 @@ kbd { font-family: inherit; font-size: 12px; border: 1px solid var(--line); bord
     <button class="btn" id="closePeople">地図に戻る ✕</button>
   </div>
   <div class="pp-body"><div class="pp-inner" id="ppContent"></div></div>
+</div>
+
+<div id="moneyPage" hidden>
+  <div class="pp-head">
+    <h1>お金の歴史</h1>
+    <div class="grow"></div>
+    <button class="btn" id="closeMoney">地図に戻る ✕</button>
+  </div>
+  <div class="pp-body"><div class="pp-inner about money-page" id="moneyContent"></div></div>
 </div>
 
 <div id="helpPage" hidden>
@@ -432,6 +469,7 @@ kbd { font-family: inherit; font-size: 12px; border: 1px solid var(--line); bord
         <tr><th>自動／日本／東アジア／世界</th><td>地図に映す範囲です。「自動」では、出来事に合わせて日本・東アジア・世界を切り替えます。ほかを選ぶと、その範囲に固定します。</td></tr>
         <tr><th>ざっくり／詳細</th><td>「ざっくり」は主な出来事だけ、「詳細」は細かい出来事も含めて表示します。</td></tr>
         <tr><th>地域</th><td>「日本」「世界史（日本以外）」「中国」「イギリス」など24の地域から選べます。選んだ地域の出来事だけで再生・移動でき、地図もその地域に寄ります。右に表示中の出来事の件数が出ます。</td></tr>
+        <tr><th>テーマ</th><td>「経済・お金」を選ぶと、貨幣・金融・経済の出来事だけを表示します。地域と組み合わせることもできます。</td></tr>
         <tr><th>標準／国別／勢力図</th><td>地図の塗り方です。「国別」は現在の国境で色分けします。「勢力図」は当時の主要国の範囲を塗り、右下にどの年のデータかを表示します。境界はおおまかな目安です。</td></tr>
       </table>
       <p class="note">選んだ表示モードは、次に開いたときも残ります（ブラウザに保存されます）。</p>
@@ -456,6 +494,12 @@ kbd { font-family: inherit; font-size: 12px; border: 1px solid var(--line); bord
         <li><b>天皇（126代）</b>：歴代天皇の一覧です。今の年の天皇に色が付きます。行を押すと、その天皇の即位の年へ移ります。</li>
         <li><b>代表的な人物</b>：時代ごとに並んでいます。「日本／世界」や名前で絞り込めます。人物を押すと説明と関わった出来事が出て、出来事を押すと地図へ移ります。</li>
       </ul>
+    </section>
+
+    <section>
+      <h2>お金の歴史</h2>
+      <p>上の「お金の歴史」を押すと、日本・中国・朝鮮半島・イギリス・アメリカ・フランス・ドイツ・ロシアと国際通貨体制について、貨幣制度の移り変わり（物々交換、銭、銀、金本位制、管理通貨、固定相場、変動相場など）を帯で比べられます。帯を押すと説明とその時期の出来事が出ます。「1800年以降を拡大」で近代を広げて見られます。</p>
+      <p>上の欄の「通貨：」には今の年の日本の貨幣制度が出ます。地域を選んでいるとその国の通貨、「経済・お金」のテーマでは国際通貨体制も出ます。右の欄の「このときのお金」からも開けます。</p>
     </section>
 
     <section>
@@ -490,7 +534,7 @@ kbd { font-family: inherit; font-size: 12px; border: 1px solid var(--line); bord
   <div class="pp-body"><div class="pp-inner about">
     <section class="warn">
       <h2>このアプリの内容について</h2>
-      <p>このアプリの出来事・人物・天皇・元号・各国の君主や指導者・年代・説明文・出来事どうしのつながり、および勢力図の日本語の国名と色分けは、<b>生成AI（Claude）が作成したもの</b>です。資料と一件ずつ照らし合わせる確認はしていないため、<b>年代・名前・内容に誤りが含まれている可能性があります</b>。</p>
+      <p>このアプリの出来事・人物・天皇・元号・各国の君主や指導者・貨幣制度の移り変わり・年代・説明文・出来事どうしのつながり、および勢力図の日本語の国名と色分けは、<b>生成AI（Claude）が作成したもの</b>です。資料と一件ずつ照らし合わせる確認はしていないため、<b>年代・名前・内容に誤りが含まれている可能性があります</b>。</p>
       <p>学習や調べものに使うときは、教科書・事典・専門書などの信頼できる資料で確かめてください。</p>
     </section>
     <section>
@@ -528,5 +572,6 @@ kbd { font-family: inherit; font-size: 12px; border: 1px solid var(--line); bord
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
 <script src="world.js"></script>
 <script src="data.js"></script>
+<script src="money.js"></script>
 <script src="powers.js"></script>
 <script src="app.js"></script>

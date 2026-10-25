@@ -8,7 +8,13 @@
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const CAT = { jp: '国内', ex: '交流・外交', war: '戦い', culture: '文化・宗教', world: '世界', disaster: '災害' };
+  const CAT = { jp: '国内', ex: '交流・外交', war: '戦い', culture: '文化・宗教', econ: '経済・お金', world: '世界', disaster: '災害' };
+  const { MONEY, MONEY_TYPES } = window.HISTORY_MONEY || { MONEY: [], MONEY_TYPES: {} };
+  const moneyById = new Map(MONEY.map(m => [m.id, m]));
+  // 貨幣制度の区切りは月単位の小数年もあるので、整数にしない年で探す
+  const moneyAt = (id, y) => { const m = moneyById.get(id); return m ? m.rows.find(r => y >= r[0] && y < r[1]) : null; };
+  const fmtRange = (a, b) => `${a <= -660 ? '〜' : fmtYearShort(a) + '〜'}${b >= 2100 ? '現在' : fmtYearShort(b)}`;
+  function fmtYearShort(y) { y = Math.floor(y); return y <= 0 ? `前${-y || 1}年` : `${y}年`; }
   const evById = new Map(EVENTS.map(e => [e.id, e]));
   const personById = new Map(PEOPLE.map(p => [p.id, p]));
   const incoming = new Map(EVENTS.map(e => [e.id, []]));
@@ -255,7 +261,8 @@
   let level = store.get('rekishi.level', '1') === '2' ? 2 : 1;
   let region = regionById.has(store.get('rekishi.region', 'all')) ? store.get('rekishi.region', 'all') : 'all';
   const inRegion = (e, r) => r === 'all' || (r === 'jp' ? e.reg.includes('jp') : r === 'world' ? e.reg.some(x => x !== 'jp') : e.reg.includes(r));
-  const isActive = e => e.lv <= level && inRegion(e, region);
+  let theme = store.get('rekishi.theme', 'all') === 'econ' ? 'econ' : 'all';
+  const isActive = e => e.lv <= level && inRegion(e, region) && (theme === 'all' || e.econ);
   let ACTIVE = EVENTS.filter(isActive);
 
   // ---------- 表示する出来事
@@ -390,15 +397,28 @@
       </div>
       ${e.people.length ? `<div><h3>関わった人物</h3><div class="chips">${e.people.map(id => chipP(personById.get(id))).join('')}</div></div>` : ''}
       ${emp && e.y >= -660 ? `<div><h3>このときの天皇</h3><div class="chips"><button class="chip person" data-emp="${emp.no}">第${emp.no}代 ${esc(emp.name)}</button></div></div>` : ''}
+      ${moneyChips(e)}
       <div><h3>つながり</h3><div class="flow">${flow}</div></div>
       <div><h3>${wantWorld ? '同じころの世界' : '同じころの日本'}</h3><div class="chips">${contemp.map(x => chipEv(x)).join('') || '<span class="empty">前後60年に登録なし</span>'}</div></div>
       <div class="navrow"><button class="btn" data-act="prev">◀ 前の出来事</button><button class="btn" data-act="next">次の出来事 ▶</button></div>`;
     side.scrollTop = 0;
   }
+  // 出来事のときのお金（日本・関わる国・国際）
+  function moneyChips(e) {
+    const ids = ['jp', ...e.reg.filter(r => r !== 'jp' && moneyById.has(r)).slice(0, 2)];
+    if (e.econ || !e.reg.includes('jp')) ids.push('global');
+    const chips = ids.map(id => {
+      const r = moneyAt(id, e.y); if (!r) return '';
+      return `<button class="chip money" data-money="${id}"><i style="background:${MONEY_TYPES[r[4]][1]}"></i><span class="cy">${esc(moneyById.get(id).name)}</span>${esc(r[2])}</button>`;
+    }).join('');
+    return chips ? `<div><h3>このときのお金</h3><div class="chips">${chips}</div></div>` : '';
+  }
+  function closeOverlays() { document.querySelectorAll('#peoplePage, #moneyPage, #helpPage, #aboutPage').forEach(p => { p.hidden = true; }); }
   document.addEventListener('click', ev => {
-    const t = ev.target.closest('[data-ev],[data-person],[data-emp],[data-act]');
+    const t = ev.target.closest('[data-ev],[data-person],[data-emp],[data-act],[data-money]');
     if (!t) return;
-    if (t.dataset.ev) { const e = evById.get(t.dataset.ev); closePeople(); stop(); setPos(e.p, e.i, { toast: true }); }
+    if (t.dataset.money) { openMoney(t.dataset.money); return; }
+    if (t.dataset.ev) { const e = evById.get(t.dataset.ev); closeOverlays(); stop(); setPos(e.p, e.i, { toast: true }); }
     else if (t.dataset.person) openPeople('people', t.dataset.person);
     else if (t.dataset.emp) openPeople('emp');
     else if (t.dataset.act === 'prev') stepEvent(-1);
@@ -413,10 +433,23 @@
       <span class="pill"><b>${esc(eraText(cur))}</b></span>
       <span class="pill" style="border-color:${per.color}">${esc(per.name)}時代</span>
       ${emp ? `<span class="pill emp" data-emp="${emp.no}">第${emp.no}代 <b>${esc(emp.name)}</b></span>` : ''}
+      ${moneyPills()}
       ${regionStates()}`;
     const n = eraFor(yearInt(cur), 'N');
     $('#eraSel').value = n ? String(ERAS.indexOf(n)) : '';
     renderPower();
+  }
+
+  // ヘッダーの通貨表示：日本はいつも、地域を選んでいればその国、経済テーマや世界史では国際通貨体制も
+  function moneyPills() {
+    const ids = ['jp'];
+    if (region !== 'jp' && moneyById.has(region)) ids.push(region);
+    if (theme === 'econ' || region === 'world') ids.push('global');
+    return ids.map(id => {
+      const r = moneyAt(id, cur); if (!r) return '';
+      const label = id === 'jp' ? '通貨' : id === 'global' ? '国際' : `${moneyById.get(id).name}の通貨`;
+      return `<span class="pill emp money" data-money="${id}"><i style="background:${MONEY_TYPES[r[4]][1]}"></i>${label}：<b>${esc(r[2])}</b></span>`;
+    }).join('');
   }
 
   // 地域モードでは、その地域にあった当時の国名をヘッダーに出す
@@ -608,7 +641,8 @@
     document.querySelectorAll('.lvbtns button[data-lv]').forEach(b => b.classList.toggle('on', +b.dataset.lv === level));
     EVENTS.forEach(e => { e._tick.hidden = !isActive(e); });
     $('#modeCount').textContent = `${ACTIVE.length}件`;
-    store.set('rekishi.level', String(level)); store.set('rekishi.region', region);
+    $('#themeSel').value = theme;
+    store.set('rekishi.level', String(level)); store.set('rekishi.region', region); store.set('rekishi.theme', theme);
     if (keepFocus) return;
     const f = EVENTS[focusIdx];
     camKey = '';
@@ -623,6 +657,7 @@
     document.querySelectorAll('.viewbtns button').forEach(x => x.classList.toggle('on', x.dataset.view === 'auto'));
     applyMode();
   });
+  $('#themeSel').addEventListener('change', ev => { theme = ev.target.value; applyMode(); });
 
   $('#legend').innerHTML = Object.entries(CAT).map(([k, v]) => `<span><i style="background:var(--c-${k})"></i>${v}</span>`).join('') + '<span>⛵ 船の移動</span>';
 
@@ -681,6 +716,70 @@
   $('#openHelp').addEventListener('click', () => { stop(); help.hidden = false; help.querySelector('.pp-body').scrollTop = 0; });
   $('#closeHelp').addEventListener('click', () => { help.hidden = true; });
   $('#closePeople').addEventListener('click', closePeople);
+
+  // ---------- お金の歴史ページ
+  const mp = $('#moneyPage');
+  let moneySel = null;
+  function openMoney(id) {
+    stop();
+    closeOverlays();
+    mp.hidden = false;
+    renderMoney(id);
+    mp.querySelector('.pp-body').scrollTop = 0;
+  }
+  $('#openMoney').addEventListener('click', () => openMoney('jp'));
+  $('#closeMoney').addEventListener('click', () => { mp.hidden = true; });
+  let moneyZoom = false;
+  function renderMoney(selId) {
+    // 近代は区切りが細かいので、1800年以降だけを広げて見られるようにする
+    const sc = moneyZoom ? (y => clamp((y - 1800) / (2027 - 1800), 0, 1)) : y2p;
+    const nowP = sc(cur);
+    const ticks = moneyZoom ? [1800, 1850, 1868, 1900, 1914, 1931, 1945, 1971, 2000]
+      : [-600, 0, 500, 800, 1000, 1200, 1400, 1600, 1700, 1800, 1868, 1945, 2000];
+    const rowsHtml = MONEY.map(m => `
+      <div class="g-row${m.id === selId ? ' sel' : ''}"><div class="g-name">${esc(m.name)}</div><div class="g-track">
+        ${m.rows.map((r, i) => {
+          const a = sc(Math.max(-660, r[0])), b = sc(Math.min(2027, r[1]));
+          if (b - a <= 0) return '';
+          const isNow = moneyAt(m.id, cur) === r;
+          return `<button class="g-seg${isNow ? ' now' : ''}" data-mrow="${m.id}" data-mi="${i}" style="left:${a * 100}%;width:${(b - a) * 100}%;background:${MONEY_TYPES[r[4]][1]}" title="${esc(r[2])}（${esc(fmtRange(r[0], r[1]))}）"><span>${esc(r[2])}</span></button>`;
+        }).join('')}
+      </div></div>`).join('');
+    const econEvents = EVENTS.filter(e => e.cat === 'econ');
+    $('#moneyContent').innerHTML = `
+      <section class="m-intro">
+        <p>物々交換から銭、銀、金本位制、管理通貨、固定相場、変動相場へ。日本と主な国、そして国際的なお金の仕組みがいつどう変わったかを並べています。帯を押すと説明が出ます。黒い線が今見ている年（${esc(fmtYear(cur))}）です。</p>
+        <div class="m-legend">${Object.values(MONEY_TYPES).map(([n, c]) => `<span><i style="background:${c}"></i>${esc(n)}</span>`).join('')}</div>
+        <div class="navrow" style="margin-top:12px;max-width:260px"><button class="btn" id="moneyZoom">${moneyZoom ? '全体を表示' : '1800年以降を拡大'}</button></div>
+      </section>
+      <div class="gantt-wrap"><div class="gantt">
+        <div class="g-axis"><div class="g-name"></div><div class="g-track">${ticks.map(y => `<span style="left:${sc(y) * 100}%">${y < 0 ? '前' + -y : y}</span>`).join('')}</div></div>
+        ${rowsHtml}
+        ${cur >= (moneyZoom ? 1800 : -660) ? `<div class="g-now" style="left:calc(var(--gname) + (100% - var(--gname)) * ${nowP})"></div>` : ''}
+      </div></div>
+      <section id="moneyDetail" class="m-detail"></section>
+      <section class="m-events"><h2>経済・お金の主な出来事</h2><p class="empty">押すと地図のその場面へ移動します。</p>
+        <div class="chips">${econEvents.map(e => `<button class="chip" data-ev="${e.id}"><span class="cy">${esc(fmtYear(e.y))}</span>${esc(e.title)}</button>`).join('')}</div></section>`;
+    $('#moneyContent').querySelectorAll('.g-seg').forEach(b => b.addEventListener('click', () => showMoneyDetail(b.dataset.mrow, +b.dataset.mi)));
+    $('#moneyZoom').addEventListener('click', () => { moneyZoom = !moneyZoom; renderMoney(moneySel ? moneySel[0] : selId); });
+    const m = moneyById.get(selId) || moneyById.get('jp');
+    const idx = m.rows.indexOf(moneyAt(m.id, cur));
+    showMoneyDetail(m.id, idx >= 0 ? idx : 0);
+  }
+  function showMoneyDetail(id, i) {
+    const m = moneyById.get(id), r = m.rows[i];
+    moneySel = [id, i];
+    $('#moneyContent').querySelectorAll('.g-seg').forEach(b => b.classList.toggle('picked', b.dataset.mrow === id && +b.dataset.mi === i));
+    // この期間・この国に関わる経済の出来事
+    const evs = EVENTS.filter(e => e.econ && e.y >= r[0] && e.y < r[1] && (id === 'global' ? e.cat === 'econ' : e.reg.includes(id))).slice(0, 12);
+    $('#moneyDetail').innerHTML = `
+      <div class="evhead"><span class="cat" style="background:${MONEY_TYPES[r[4]][1]}">${esc(MONEY_TYPES[r[4]][0])}</span><span>${esc(m.name)}・${esc(fmtRange(r[0], r[1]))}</span></div>
+      <h2>${esc(r[2])}</h2>
+      <p>${esc(r[3])}</p>
+      ${evs.length ? `<h3>この時期の出来事</h3><div class="chips">${evs.map(e => `<button class="chip" data-ev="${e.id}"><span class="cy">${esc(fmtYear(e.y))}</span>${esc(e.title)}</button>`).join('')}</div>` : ''}
+      <div class="navrow"><button class="btn" id="moneyJump">この制度が始まった年へ移動</button></div>`;
+    $('#moneyJump').addEventListener('click', () => { mp.hidden = true; stop(); jumpYear(Math.max(-660, Math.ceil(r[0]))); });
+  }
   document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => openPeople(b.dataset.tab)));
 
   function renderEmp() {
@@ -735,6 +834,7 @@
   // ---------- キーボード
   document.addEventListener('keydown', ev => {
     if (ev.target.closest('input, select, textarea')) return;
+    if (!mp.hidden) { if (ev.key === 'Escape') mp.hidden = true; return; }
     if (!help.hidden) { if (ev.key === 'Escape') help.hidden = true; return; }
     if (!about.hidden) { if (ev.key === 'Escape') about.hidden = true; return; }
     if (!pp.hidden) { if (ev.key === 'Escape') closePeople(); return; }
