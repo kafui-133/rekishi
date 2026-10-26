@@ -15,7 +15,7 @@
   --sea: #b7cfd3; --land: #ebe2cb; --land-stroke: #a59572; --japan: #dcc184; --border: #a99c7a; --grid: #9fbcc1;
   --p0: #e8c9a6; --p1: #c8dbad; --p2: #b8cfe2; --p3: #e5b8b8; --p4: #d6c6e6; --p5: #efdc9e; --p6: #b5ddd2; --p7: #d8c9b2;
   --label: #4d4029; --hist: #6b5a3a; --halo: #f4efe2;
-  --c-jp: #b4462f; --c-ex: #2c6c9f; --c-war: #8b2a3b; --c-culture: #7656a3; --c-econ: #0f8789; --c-world: #36845a; --c-disaster: #b8731a;
+  --c-jp: #b4462f; --c-ex: #2c6c9f; --c-war: #8b2a3b; --c-culture: #7656a3; --c-econ: #0f8789; --c-life: #b8527a; --c-world: #36845a; --c-disaster: #b8731a;
   --k-自然: #3d8b57; --k-経済: #0f7f81; --k-政治: #b04530; --k-外交: #2c6c9f; --k-人物: #8a5a2b; --k-技術: #66707a; --k-思想: #7656a3; --k-偶然: #b07a12; --k-社会: #a1517a;
   --display: 'Shippori Mincho B1', 'Yu Mincho', 'Hiragino Mincho ProN', serif;
   --body: 'Zen Kaku Gothic New', 'Hiragino Sans', 'Yu Gothic UI', 'Meiryo', sans-serif;
@@ -27,7 +27,7 @@
   --sea: #12303a; --land: #3a4033; --land-stroke: #69704f; --japan: #6e5c30; --border: #586049; --grid: #1d4350;
   --p0: #6b5236; --p1: #4e6540; --p2: #3e5970; --p3: #6a4444; --p4: #594a6d; --p5: #6d6034; --p6: #3e675e; --p7: #5d5240;
   --label: #eadfc4; --hist: #c9b98f; --halo: #12303a;
-  --c-jp: #e2765c; --c-ex: #5ea6de; --c-war: #dc6274; --c-culture: #b08dd8; --c-econ: #3cc3c4; --c-world: #6fc18d; --c-disaster: #e4a64a;
+  --c-jp: #e2765c; --c-ex: #5ea6de; --c-war: #dc6274; --c-culture: #b08dd8; --c-econ: #3cc3c4; --c-life: #e58aaa; --c-world: #6fc18d; --c-disaster: #e4a64a;
   color-scheme: dark; } }
 :root[data-theme="dark"] {
   --bg: #0e1416; --panel: #152024; --panel2: #1b292e; --ink: #e5e9e2; --muted: #9ba7a6; --line: #2a393d;
@@ -35,7 +35,7 @@
   --sea: #12303a; --land: #3a4033; --land-stroke: #69704f; --japan: #6e5c30; --border: #586049; --grid: #1d4350;
   --p0: #6b5236; --p1: #4e6540; --p2: #3e5970; --p3: #6a4444; --p4: #594a6d; --p5: #6d6034; --p6: #3e675e; --p7: #5d5240;
   --label: #eadfc4; --hist: #c9b98f; --halo: #12303a;
-  --c-jp: #e2765c; --c-ex: #5ea6de; --c-war: #dc6274; --c-culture: #b08dd8; --c-econ: #3cc3c4; --c-world: #6fc18d; --c-disaster: #e4a64a;
+  --c-jp: #e2765c; --c-ex: #5ea6de; --c-war: #dc6274; --c-culture: #b08dd8; --c-econ: #3cc3c4; --c-life: #e58aaa; --c-world: #6fc18d; --c-disaster: #e4a64a;
   color-scheme: dark; }
 
 * { box-sizing: border-box; }
@@ -252,7 +252,7 @@ table.emp tr.legend td { color: var(--muted); }
 .m-legend span, .pill.money, .chip.money { display: inline-flex; align-items: center; gap: 5px; }
 .m-legend i, .pill.money i, .chip.money i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; flex: none; }
 .gantt-wrap { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
-.gantt { --gname: 104px; position: relative; min-width: 900px; display: flex; flex-direction: column; gap: 6px; }
+.gantt { --gname: 128px; position: relative; min-width: 900px; display: flex; flex-direction: column; gap: 6px; }
 .g-row, .g-axis { display: flex; align-items: stretch; }
 .g-name { width: var(--gname); flex: none; font-size: 13px; font-weight: 700; display: flex; align-items: center; }
 .g-row.sel .g-name { color: var(--accent); }
@@ -329,7 +329,7 @@ kbd { font-family: inherit; font-size: 12px; border: 1px solid var(--line); bord
       <div id="results" hidden></div>
     </div>
     <button class="btn" id="openPeople">人物・天皇</button>
-    <button class="btn" id="openMoney" title="貨幣制度の移り変わり">お金の歴史</button>
+    <button class="btn" id="openMoney" title="お金・暮らしの移り変わり">お金・暮らし</button>
     <button class="btn" id="openHelp" title="画面の見方と使い方">使い方</button>
     <button class="btn" id="openAbout" title="データの出典と注意事項">出典・注意事項</button>
   </header>
@@ -352,6 +352,7 @@ kbd { font-family: inherit; font-size: 12px; border: 1px solid var(--line); bord
         <select id="themeSel" aria-label="テーマ">
           <option value="all">すべてのテーマ</option>
           <option value="econ">経済・お金</option>
+          <option value="life">暮らし・風俗</option>
         </select>
         <span id="modeCount"></span>
         <div class="lvbtns" id="colorBtns" title="国別の色分けは現在の国境です">
@@ -414,7 +415,11 @@ kbd { font-family: inherit; font-size: 12px; border: 1px solid var(--line); bord
 
 <div id="moneyPage" hidden>
   <div class="pp-head">
-    <h1>お金の歴史</h1>
+    <h1>テーマ別の歴史</h1>
+    <div class="tabs ttabs">
+      <button data-tl="money" class="on">お金</button>
+      <button data-tl="life">暮らし（住まい・服装・食事）</button>
+    </div>
     <div class="grow"></div>
     <button class="btn" id="closeMoney">地図に戻る ✕</button>
   </div>
@@ -488,7 +493,7 @@ kbd { font-family: inherit; font-size: 12px; border: 1px solid var(--line); bord
         <tr><th>自動／日本／東アジア／世界</th><td>地図に映す範囲です。「自動」では、出来事に合わせて日本・東アジア・世界を切り替えます。ほかを選ぶと、その範囲に固定します。</td></tr>
         <tr><th>ざっくり／詳細</th><td>「ざっくり」は主な出来事だけ、「詳細」は細かい出来事も含めて表示します。</td></tr>
         <tr><th>地域</th><td>「日本」「世界史（日本以外）」「中国」「イギリス」など24の地域から選べます。選んだ地域の出来事だけで再生・移動でき、地図もその地域に寄ります。右に表示中の出来事の件数が出ます。</td></tr>
-        <tr><th>テーマ</th><td>「経済・お金」を選ぶと、貨幣・金融・経済の出来事だけを表示します。地域と組み合わせることもできます。</td></tr>
+        <tr><th>テーマ</th><td>「経済・お金」を選ぶと貨幣・金融・経済の出来事、「暮らし・風俗」を選ぶと住まい・服装・食事などの出来事だけを表示します。地域と組み合わせることもできます。</td></tr>
         <tr><th>標準／国別／勢力図</th><td>地図の塗り方です。「国別」は現在の国境で色分けします。「勢力図」は当時の主要国の範囲を塗り、右下にどの年のデータかを表示します。境界はおおまかな目安です。</td></tr>
       </table>
       <p class="note">選んだ表示モードは、次に開いたときも残ります（ブラウザに保存されます）。</p>
@@ -539,8 +544,10 @@ kbd { font-family: inherit; font-size: 12px; border: 1px solid var(--line); bord
     </section>
 
     <section>
-      <h2>お金の歴史</h2>
-      <p>上の「お金の歴史」を押すと、日本・中国・朝鮮半島・イギリス・アメリカ・フランス・ドイツ・ロシアと国際通貨体制について、貨幣制度の移り変わり（物々交換、銭、銀、金本位制、管理通貨、固定相場、変動相場など）を帯で比べられます。帯を押すと説明とその時期の出来事が出ます。「1800年以降を拡大」で近代を広げて見られます。</p>
+      <h2>お金・暮らしの歴史</h2>
+      <p>上の「お金・暮らし」を押すと「テーマ別の歴史」のページが開き、「お金」と「暮らし」をタブで切り替えられます。</p>
+      <p><b>暮らし</b>：日本の住まい・服装・食事と、中国の住まい、ヨーロッパの住まい・服装の移り変わりを帯で比べられます。例：竪穴住居と高床倉庫 → 寝殿造 → 書院造と畳 → 町家・長屋 → レンガ造り（幕末の反射炉、1872年の銀座煉瓦街）→ 鉄筋コンクリート → 団地。右の欄の「このときの暮らし」からも開けます。</p>
+      <p><b>お金</b>：日本・中国・朝鮮半島・イギリス・アメリカ・フランス・ドイツ・ロシアと国際通貨体制について、貨幣制度の移り変わり（物々交換、銭、銀、金本位制、管理通貨、固定相場、変動相場など）を帯で比べられます。帯を押すと説明とその時期の出来事が出ます。「1800年以降を拡大」で近代を広げて見られます。</p>
       <p>上の欄の「通貨：」には今の年の日本の貨幣制度が出ます。地域を選んでいるとその国の通貨、「経済・お金」のテーマでは国際通貨体制も出ます。右の欄の「このときのお金」からも開けます。</p>
     </section>
 
@@ -576,7 +583,7 @@ kbd { font-family: inherit; font-size: 12px; border: 1px solid var(--line); bord
   <div class="pp-body"><div class="pp-inner about">
     <section class="warn">
       <h2>このアプリの内容について</h2>
-      <p>このアプリの出来事・人物・天皇・元号・各国の君主や指導者・貨幣制度の移り変わり・年代・説明文・出来事どうしのつながり・「なぜ起きたか」の原因の説明、および勢力図の日本語の国名と色分けは、<b>生成AI（Claude）が作成したもの</b>です。資料と一件ずつ照らし合わせる確認はしていないため、<b>年代・名前・内容に誤りが含まれている可能性があります</b>。</p>
+      <p>このアプリの出来事・人物・天皇・元号・各国の君主や指導者・貨幣制度と暮らし（住まい・服装・食事）の移り変わり・年代・説明文・出来事どうしのつながり・「なぜ起きたか」の原因の説明、および勢力図の日本語の国名と色分けは、<b>生成AI（Claude）が作成したもの</b>です。資料と一件ずつ照らし合わせる確認はしていないため、<b>年代・名前・内容に誤りが含まれている可能性があります</b>。</p>
       <p>学習や調べものに使うときは、教科書・事典・専門書などの信頼できる資料で確かめてください。</p>
     </section>
     <section>
@@ -613,10 +620,11 @@ kbd { font-family: inherit; font-size: 12px; border: 1px solid var(--line); bord
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
 <script src="world.js?v=dfd4343824"></script>
-<script src="data.js?v=7d88c95ea6"></script>
+<script src="data.js?v=8cd133068e"></script>
 <script src="money.js?v=8f7cb10bbb"></script>
-<script src="why.js?v=ca8f5d1ca0"></script>
+<script src="life.js?v=56bf4840fa"></script>
+<script src="why.js?v=df5666dab9"></script>
 <script src="powers.js?v=b77955ddb7"></script>
-<script src="app.js?v=74d16b36c2"></script>
+<script src="app.js?v=115cc109a2"></script>
 </body>
 </html>

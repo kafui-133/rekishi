@@ -16,7 +16,7 @@
 - 「ざっくり」と「詳細」の2段階、全24地域での絞り込み
 - 地図の色：標準／現在の国別／当時の勢力図
 - 出来事が「なぜ起きたか」を、背景・きっかけ・偶然の要素に分けて原因の連鎖でたどる表示
-- 「経済・お金」のテーマと、貨幣制度の移り変わりを国ごとに比べる「お金の歴史」ページ
+- 「経済・お金」「暮らし・風俗」のテーマと、貨幣制度や住まい・服装・食事の移り変わりを比べる「テーマ別の歴史」ページ
 - 人物・天皇（126代）のページ、使い方・出典・注意事項のページ
 
 ## フォルダ構成
@@ -26,6 +26,7 @@
 | `index.html` `app.js` | アプリ本体。`index.html` は claude.ai のアーティファクト用で、`<!doctype html>` などの外枠を含みません |
 | `data.js` | 出来事・人物・天皇・元号・地域・君主のデータ（生成AIが作成） |
 | `why.js` | 出来事ごとの「なぜ起きたか」（原因の連鎖。生成AIが作成） |
+| `life.js` | 住まい・服装・食事の移り変わり（生成AIが作成） |
 | `money.js` | 日本と主な国・国際通貨体制の貨幣制度の移り変わり（生成AIが作成） |
 | `world.js` | 世界地図（world-atlas の countries-50m） |
 | `powers.js` | 勢力図データ（historical-basemaps を加工） |
@@ -81,4 +82,4 @@ npm run site
 | D3.js | [d3js.org](https://d3js.org/) | ISC | CDN から読み込み |
 | topojson-client | [topojson](https://github.com/topojson/topojson-client) | ISC | CDN から読み込み |
 | フォント | Google Fonts（Shippori Mincho B1、Zen Kaku Gothic New） | SIL Open Font License | Google Fonts から読み込み |
-| 出来事・人物・天皇・元号・君主・貨幣制度・原因の説明・説明文 | 生成AI（Claude）が作成 | このリポジトリのライセンスに従う | 特定の資料からの転載ではありません |
+| 出来事・人物・天皇・元号・君主・貨幣制度・暮らしの移り変わり・原因の説明・説明文 | 生成AI（Claude）が作成 | このリポジトリのライセンスに従う | 特定の資料からの転載ではありません |
