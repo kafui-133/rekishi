@@ -16,6 +16,7 @@
   --p0: #e8c9a6; --p1: #c8dbad; --p2: #b8cfe2; --p3: #e5b8b8; --p4: #d6c6e6; --p5: #efdc9e; --p6: #b5ddd2; --p7: #d8c9b2;
   --label: #4d4029; --hist: #6b5a3a; --halo: #f4efe2;
   --c-jp: #b4462f; --c-ex: #2c6c9f; --c-war: #8b2a3b; --c-culture: #7656a3; --c-econ: #0f8789; --c-world: #36845a; --c-disaster: #b8731a;
+  --k-自然: #3d8b57; --k-経済: #0f7f81; --k-政治: #b04530; --k-外交: #2c6c9f; --k-人物: #8a5a2b; --k-技術: #66707a; --k-思想: #7656a3; --k-偶然: #b07a12; --k-社会: #a1517a;
   --display: 'Shippori Mincho B1', 'Yu Mincho', 'Hiragino Mincho ProN', serif;
   --body: 'Zen Kaku Gothic New', 'Hiragino Sans', 'Yu Gothic UI', 'Meiryo', sans-serif;
   --emoji: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
@@ -148,6 +149,19 @@ g.mk.focus .badge { stroke-width: 3; }
 .chip .cy { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .chip .lbl { font-size: 11px; color: var(--accent); white-space: nowrap; }
 .chip.person { border-radius: 999px; }
+/* なぜ起きたか */
+.why { display: flex; flex-direction: column; gap: 10px; }
+.wchain { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px 10px; background: var(--panel2); display: flex; flex-direction: column; align-items: stretch; }
+.wchain.chance { border-color: var(--k-偶然); border-style: dashed; }
+.wlabel { font-size: 11px; font-weight: 700; letter-spacing: .1em; color: var(--muted); margin-bottom: 6px; }
+.wstep { display: flex; align-items: baseline; gap: 6px; font-size: 13.5px; line-height: 1.6; text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 5px 8px; }
+.wstep.link { cursor: pointer; border-color: var(--accent); }
+.wstep.link:hover { background: var(--accent-soft); }
+.wstep > span:nth-last-child(1).cy { margin-left: auto; white-space: nowrap; font-size: 11px; color: var(--accent); }
+.wk { flex: none; font-size: 10.5px; font-weight: 700; color: #fff; border-radius: 4px; padding: 0 5px; line-height: 1.7; }
+.warr { text-align: center; color: var(--muted); font-size: 12px; line-height: 1.2; padding: 1px 0; }
+.wme { font-size: 12px; font-weight: 700; text-align: center; color: var(--accent); border: 1.5px solid var(--accent); border-radius: 999px; padding: 2px 8px; align-self: center; }
+.wnote { font-size: 11.5px; color: var(--muted); margin: 6px 0 0; }
 .flow { display: flex; flex-direction: column; gap: 4px; }
 .flow .row { border-left: 3px solid var(--line); padding: 4px 0 4px 10px; }
 .flow .row .rl { font-size: 11px; color: var(--muted); margin-bottom: 4px; letter-spacing: .06em; }
@@ -481,6 +495,29 @@ kbd { font-family: inherit; font-size: 12px; border: 1px solid var(--line); bord
     </section>
 
     <section>
+      <h2>なぜ起きたかを見る</h2>
+      <p>右の欄の「なぜ起きたか」には、その出来事が起きた理由が、遠い原因から順に矢印でつながって並びます。最後が「この出来事」です。</p>
+      <p>例：天明の大飢饉なら「浅間山の噴火で日射がさえぎられた → 冷害 → 大凶作 → 藩が年貢米を売ってしまい地元に米が残らなかった → この出来事」。</p>
+      <ul>
+        <li><b>背景</b>：長い時間をかけて積み重なった原因です。</li>
+        <li><b>きっかけ</b>：直接の引き金になった出来事です。</li>
+        <li><b>偶然</b>：嵐や漂着など、たまたま起きたことが結果を左右した場合です（点線の枠）。</li>
+        <li><b>その後</b>：この出来事から続いて起きたことです。</li>
+      </ul>
+      <p>各段階の色ラベルは原因の種類です：
+        <span class="chipc"><i style="background:var(--k-自然)"></i>自然</span>
+        <span class="chipc"><i style="background:var(--k-経済)"></i>経済</span>
+        <span class="chipc"><i style="background:var(--k-政治)"></i>政治</span>
+        <span class="chipc"><i style="background:var(--k-外交)"></i>外交</span>
+        <span class="chipc"><i style="background:var(--k-社会)"></i>社会</span>
+        <span class="chipc"><i style="background:var(--k-人物)"></i>人物</span>
+        <span class="chipc"><i style="background:var(--k-技術)"></i>技術</span>
+        <span class="chipc"><i style="background:var(--k-思想)"></i>思想</span>
+        <span class="chipc"><i style="background:var(--k-偶然)"></i>偶然</span></p>
+      <p>年が書かれた枠はアプリ内の出来事です。押すとその出来事へ移り、さらにその「なぜ」をさかのぼれます。歴史の連鎖を、原因の原因へとたどってみてください。原因には諸説あり、ここではよく挙げられる説明をまとめています。</p>
+    </section>
+
+    <section>
       <h2>出来事のつながりを見る</h2>
       <p>右の欄の「つながり」には、選んでいる出来事を真ん中にして、上に「きっかけ・背景」「さらに前の背景」、下に「その後・影響」「さらにその先」が並びます。小さな文字は、どうつながっているかの説明です。どれかを押すと、その出来事へ移ります。</p>
       <p>例：ペリー来航 → 日米和親条約 → 日米修好通商条約 → 桜田門外の変 … とたどっていけます。</p>
@@ -539,7 +576,7 @@ kbd { font-family: inherit; font-size: 12px; border: 1px solid var(--line); bord
   <div class="pp-body"><div class="pp-inner about">
     <section class="warn">
       <h2>このアプリの内容について</h2>
-      <p>このアプリの出来事・人物・天皇・元号・各国の君主や指導者・貨幣制度の移り変わり・年代・説明文・出来事どうしのつながり、および勢力図の日本語の国名と色分けは、<b>生成AI（Claude）が作成したもの</b>です。資料と一件ずつ照らし合わせる確認はしていないため、<b>年代・名前・内容に誤りが含まれている可能性があります</b>。</p>
+      <p>このアプリの出来事・人物・天皇・元号・各国の君主や指導者・貨幣制度の移り変わり・年代・説明文・出来事どうしのつながり・「なぜ起きたか」の原因の説明、および勢力図の日本語の国名と色分けは、<b>生成AI（Claude）が作成したもの</b>です。資料と一件ずつ照らし合わせる確認はしていないため、<b>年代・名前・内容に誤りが含まれている可能性があります</b>。</p>
       <p>学習や調べものに使うときは、教科書・事典・専門書などの信頼できる資料で確かめてください。</p>
     </section>
     <section>
@@ -576,9 +613,10 @@ kbd { font-family: inherit; font-size: 12px; border: 1px solid var(--line); bord
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
 <script src="world.js?v=dfd4343824"></script>
-<script src="data.js?v=0cc6f9ed4f"></script>
+<script src="data.js?v=7d88c95ea6"></script>
 <script src="money.js?v=8f7cb10bbb"></script>
+<script src="why.js?v=ca8f5d1ca0"></script>
 <script src="powers.js?v=b77955ddb7"></script>
-<script src="app.js?v=92a280b007"></script>
+<script src="app.js?v=74d16b36c2"></script>
 </body>
 </html>

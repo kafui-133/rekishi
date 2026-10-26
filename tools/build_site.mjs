@@ -8,7 +8,7 @@ import crypto from 'crypto';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..');
 const OUT = path.join(ROOT, 'docs');
-const FILES = ['app.js', 'data.js', 'money.js', 'world.js', 'powers.js'];
+const FILES = ['app.js', 'data.js', 'money.js', 'why.js', 'world.js', 'powers.js'];
 
 const src = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 const cut = src.indexOf('</style>') + '</style>'.length;

@@ -395,6 +395,7 @@
         <h2>${esc(e.title)}</h2>
         <p class="desc">${esc(e.desc)}</p>
       </div>
+      ${whyHtml(e)}
       ${e.people.length ? `<div><h3>関わった人物</h3><div class="chips">${e.people.map(id => chipP(personById.get(id))).join('')}</div></div>` : ''}
       ${emp && e.y >= -660 ? `<div><h3>このときの天皇</h3><div class="chips"><button class="chip person" data-emp="${emp.no}">第${emp.no}代 ${esc(emp.name)}</button></div></div>` : ''}
       ${moneyChips(e)}
@@ -403,6 +404,28 @@
       <div class="navrow"><button class="btn" data-act="prev">◀ 前の出来事</button><button class="btn" data-act="next">次の出来事 ▶</button></div>`;
     side.scrollTop = 0;
   }
+  // なぜ起きたか：遠い原因から順に並べ、最後に「この出来事」へつなぐ
+  const WHY = window.HISTORY_WHY || {};
+  const WHY_ORDER = { 伝承の背景: 0, 背景: 1, 年代の決め方: 2, 偶然: 3, きっかけ: 4, その後: 5 };
+  function whyHtml(e) {
+    const chains = (WHY[e.id] || []).slice().sort((a, b) => (WHY_ORDER[a.label] ?? 1) - (WHY_ORDER[b.label] ?? 1));
+    if (!chains.length) return '';
+    const step = s => {
+      const kind = s.kind ? `<span class="wk" style="background:var(--k-${s.kind})">${esc(s.kind)}</span>` : '';
+      const linked = s.ev && evById.get(s.ev);
+      return linked
+        ? `<button class="wstep link" data-ev="${s.ev}">${kind}<span>${esc(s.t)}</span><span class="cy">${esc(fmtYear(linked.y))} ▶</span></button>`
+        : `<div class="wstep">${kind}<span>${esc(s.t)}</span></div>`;
+    };
+    const body = chains.map(c => {
+      const after = c.label === 'その後';
+      const steps = c.steps.map(step).join('<div class="warr">↓</div>');
+      return `<div class="wchain${c.label === '偶然' ? ' chance' : ''}"><div class="wlabel">${esc(c.label)}</div>
+        ${after ? `<div class="wme">この出来事</div><div class="warr">↓</div>${steps}` : `${steps}<div class="warr">↓</div><div class="wme">この出来事</div>`}</div>`;
+    }).join('');
+    return `<div><h3>なぜ起きたか</h3><div class="why">${body}</div><p class="wnote">原因には諸説あります。よく挙げられる説明をまとめています。</p></div>`;
+  }
+
   // 出来事のときのお金（日本・関わる国・国際）
   function moneyChips(e) {
     const ids = ['jp', ...e.reg.filter(r => r !== 'jp' && moneyById.has(r)).slice(0, 2)];
